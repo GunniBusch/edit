@@ -10,13 +10,13 @@ cargo build --release --bin edit
 
 The binary is written to `target/release/edit`.
 
-To also build the library artifacts:
+To check the library crate:
 
 ```sh
 cargo build --release --lib
 ```
 
-This package emits both `libedit.rlib` and `libedit.dylib`.
+Cargo builds the normal Rust library artifact for use by Rust crates.
 
 To prefer dynamic Rust linking for the binary:
 
@@ -25,6 +25,8 @@ RUSTFLAGS="-C prefer-dynamic" cargo build --release --bin edit
 ```
 
 That requires the matching Rust toolchain libraries to be available at runtime.
+A Rust `dylib` is not a stable C ABI; foreign-language callers need a separate
+`cdylib` API.
 
 ## CLI
 
