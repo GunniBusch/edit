@@ -1,0 +1,32 @@
+use std::{env, ffi::OsString};
+
+struct Vars([(&'static str, Option<OsString>); 3]);
+
+impl Drop for Vars {
+    fn drop(&mut self) {
+        for (key, value) in &self.0 {
+            match value {
+                Some(value) => env::set_var(key, value),
+                None => env::remove_var(key),
+            }
+        }
+    }
+}
+
+#[test]
+fn picks_editor_in_order() {
+    let _vars = Vars(["EDIT_EDITOR", "VISUAL", "EDITOR"].map(|key| (key, env::var_os(key))));
+    for key in ["EDIT_EDITOR", "VISUAL", "EDITOR"] {
+        env::remove_var(key);
+    }
+
+    assert_eq!(edit::editor(), "vi");
+    env::set_var("EDITOR", "ed");
+    assert_eq!(edit::editor(), "ed");
+    env::set_var("VISUAL", "vim");
+    assert_eq!(edit::editor(), "vim");
+    env::set_var("EDIT_EDITOR", "");
+    assert_eq!(edit::editor(), "vim");
+    env::set_var("EDIT_EDITOR", "zed");
+    assert_eq!(edit::editor(), "zed");
+}

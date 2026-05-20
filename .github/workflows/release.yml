@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  create:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
+            gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "Release $GITHUB_REF_NAME"
+
+  build:
+    name: Build
+    needs: create
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup toolchain install stable --profile minimal
+      - run: rustup default stable
+      - run: cargo build --release
+      - run: |
+          name="edit-${RUNNER_OS}-${RUNNER_ARCH}"
+          mkdir "$name"
+          cp target/release/edit README.md LICENSE "$name/"
+          cp target/release/deps/libedit.* "$name/" 2>/dev/null || true
+          tar -czf "$name.tar.gz" "$name"
+          gh release upload "$GITHUB_REF_NAME" "$name.tar.gz" --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
