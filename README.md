@@ -13,8 +13,9 @@ edit file1.txt file2.txt
 ## Library
 
 ```rust
-edit::open(["file.txt"]);  // execs the editor
-edit::spawn(["file.txt"])?; // starts the editor
+edit::open(["file.txt"]);                       // uses VISUAL, EDITOR, vi
+edit::open_with("MY_APP_EDITOR", ["file.txt"]); // app override first
+edit::spawn(["file.txt"])?;                     // starts the editor
 ```
 
 ## License

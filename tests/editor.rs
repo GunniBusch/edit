@@ -1,6 +1,6 @@
 use std::{env, ffi::OsString};
 
-struct Vars([(&'static str, Option<OsString>); 3]);
+struct Vars([(&'static str, Option<OsString>); 4]);
 
 impl Drop for Vars {
     fn drop(&mut self) {
@@ -15,8 +15,8 @@ impl Drop for Vars {
 
 #[test]
 fn picks_editor_in_order() {
-    let _vars = Vars(["EDIT_EDITOR", "VISUAL", "EDITOR"].map(|key| (key, env::var_os(key))));
-    for key in ["EDIT_EDITOR", "VISUAL", "EDITOR"] {
+    let _vars = Vars(["EDIT_EDITOR", "APP_EDITOR", "VISUAL", "EDITOR"].map(|key| (key, env::var_os(key))));
+    for key in ["EDIT_EDITOR", "APP_EDITOR", "VISUAL", "EDITOR"] {
         env::remove_var(key);
     }
 
@@ -28,5 +28,8 @@ fn picks_editor_in_order() {
     env::set_var("EDIT_EDITOR", "");
     assert_eq!(edit::editor(), "vim");
     env::set_var("EDIT_EDITOR", "zed");
-    assert_eq!(edit::editor(), "zed");
+    assert_eq!(edit::editor(), "vim");
+    assert_eq!(edit::editor_with("EDIT_EDITOR"), "zed");
+    env::set_var("APP_EDITOR", "nano");
+    assert_eq!(edit::editor_with("APP_EDITOR"), "nano");
 }
