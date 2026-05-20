@@ -22,19 +22,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        include:
+          - os: ubuntu-24.04
+            target: x86_64-unknown-linux-gnu
+            archive: edit-linux-x86_64
+          - os: ubuntu-24.04
+            target: aarch64-unknown-linux-gnu
+            archive: edit-linux-aarch64
+            apt: gcc-aarch64-linux-gnu
+            linker: aarch64-linux-gnu-gcc
+          - os: macos-26
+            target: x86_64-apple-darwin
+            archive: edit-macos-x86_64
+          - os: macos-26
+            target: aarch64-apple-darwin
+            archive: edit-macos-aarch64
     steps:
       - uses: actions/checkout@v6
       - run: rustup update stable && rustup default stable
-      - run: cargo build --release --verbose
+      - run: rustup target add ${{ matrix.target }}
+      - if: matrix.apt
+        run: sudo apt-get update && sudo apt-get install -y ${{ matrix.apt }}
+      - run: cargo build --release --verbose --bin edit --target ${{ matrix.target }}
+        env:
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.linker }}
       - run: |
-          name="edit-${RUNNER_OS}-${RUNNER_ARCH}"
+          name="${{ matrix.archive }}"
           mkdir "$name"
-          cp target/release/edit README.md LICENSE "$name/"
+          cp "target/${{ matrix.target }}/release/edit" README.md LICENSE "$name/"
           tar -czf "$name.tar.gz" "$name"
       - uses: actions/upload-artifact@v4
         with:
-          name: edit-${{ runner.os }}-${{ runner.arch }}
+          name: ${{ matrix.archive }}
           path: edit-*.tar.gz
 
   publish:
