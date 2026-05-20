@@ -27,7 +27,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - run: rustup toolchain install stable --profile minimal
       - run: rustup default stable
       - run: cargo build --release
