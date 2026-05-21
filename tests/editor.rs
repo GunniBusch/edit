@@ -20,16 +20,16 @@ fn picks_editor_in_order() {
         env::remove_var(key);
     }
 
-    assert_eq!(edit::editor(), "vi");
+    assert_eq!(edit::editor(None), "vi");
     env::set_var("EDITOR", "ed");
-    assert_eq!(edit::editor(), "ed");
+    assert_eq!(edit::editor(None), "ed");
     env::set_var("VISUAL", "vim");
-    assert_eq!(edit::editor(), "vim");
+    assert_eq!(edit::editor(None), "vim");
     env::set_var("EDIT_EDITOR", "");
-    assert_eq!(edit::editor(), "vim");
+    assert_eq!(edit::editor(Some("EDIT_EDITOR")), "vim");
     env::set_var("EDIT_EDITOR", "zed");
-    assert_eq!(edit::editor(), "vim");
-    assert_eq!(edit::editor_with("EDIT_EDITOR"), "zed");
+    assert_eq!(edit::editor(None), "vim");
+    assert_eq!(edit::editor(Some("EDIT_EDITOR")), "zed");
     env::set_var("APP_EDITOR", "nano");
-    assert_eq!(edit::editor_with("APP_EDITOR"), "nano");
+    assert_eq!(edit::editor(Some("APP_EDITOR")), "nano");
 }
