@@ -51,7 +51,7 @@ jobs:
           mkdir "$name"
           cp "target/${{ matrix.target }}/release/edit" README.md LICENSE "$name/"
           tar -czf "$name.tar.gz" "$name"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.archive }}
           path: edit-*.tar.gz
